@@ -7,7 +7,7 @@ const
     eliminarPermiso,
     obtenerCompartidosConmigo,
     obtenerCompartidosPorMi,
-} = require('../controllers/permisosController');
+} = require('../controllers/permisosController.js');
 
 router.use(verificarToken);
 
