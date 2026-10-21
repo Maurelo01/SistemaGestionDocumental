@@ -3,8 +3,12 @@ const express = require('express');
 const cors = require('cors');
 const conectarDB = require('./config/db');
 
-const rutasAutenticacion = require('./routes/autenticacionRoutes');
-const rutasUsuarios = require('./routes/usuariosRoutes');
+const rutasAutenticacion = require('./routes/autenticacionRoute');
+const rutasUsuarios = require('./routes/usuariosRoute');
+const rutasCarpetas = require('./routes/carpetasRoute');
+const rutasArchivos = require('./routes/archivosRoute');
+const rutasPermisos = require('./routes/permisosRoute');
+const rutasPapelera = require('./routes/papeleraRoute');
 
 const app = express();
 const PUERTO = process.env.PUERTO || 3000;
@@ -17,6 +21,10 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use('/api/v1/auth', rutasAutenticacion);
 app.use('/api/v1/usuarios', rutasUsuarios);
+app.use('/api/v1/carpetas', rutasCarpetas);
+app.use('/api/v1/archivos', rutasArchivos);
+app.use('/api/v1/permisos', rutasPermisos);
+app.use('/api/v1/papelera', rutasPapelera);
 
 app.get('/api/v1/salud', (req, res) =>
 {
