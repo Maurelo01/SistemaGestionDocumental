@@ -1,1 +1,75 @@
-/* You can add global styles to this file, and also import other style files */
+body {
+  margin: 0;
+  background-color: #F8F5E6;
+  color: #081C2F;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+.bg-minimal {
+  background-color: #F8F5E6;
+}
+
+.text-dark-blue {
+  color: #081C2F;
+}
+
+.bg-dark-blue {
+  background-color: #081C2F;
+  color: #F8F5E6;
+}
+
+.text-accent {
+  color: #D4AF37;
+}
+
+.nav-minimal {
+  color: #F8F5E6;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.nav-minimal:hover,
+.nav-minimal.active {
+  background-color: #102A43;
+  color: #D4AF37;
+}
+
+.btn-minimal {
+  background-color: #243B53;
+  color: #F8F5E6;
+  border: none;
+}
+
+.btn-minimal:hover:not(:disabled) {
+  background-color: #D4AF37;
+  color: #081C2F;
+}
+
+.btn-outline-minimal {
+  color: #243B53;
+  border: 1px solid #243B53;
+  background-color: transparent;
+}
+
+.btn-outline-minimal:hover {
+  background-color: #243B53;
+  color: #F8F5E6;
+}
+
+.btn-outline-accent {
+  color: #F8F5E6;
+  border: 1px solid #D4AF37;
+  background-color: transparent;
+}
+
+.btn-outline-accent:hover {
+  background-color: #D4AF37;
+  color: #081C2F;
+}
+
+.content-card {
+  background-color: #ffffff;
+  border-radius: 14px;
+}

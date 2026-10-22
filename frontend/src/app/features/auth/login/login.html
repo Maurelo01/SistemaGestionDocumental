@@ -1,0 +1,45 @@
+<div class="login-bg d-flex justify-content-center align-items-center vh-100">
+  <div class="card login-card p-4 border-0 shadow-lg">
+    <h3 class="text-center fw-bold mb-1">Gestor Documental</h3>
+
+    <form [formGroup]="formularioLogin" (ngSubmit)="iniciarSesion()">
+      <div class="mb-3">
+        <label for="nombreUsuario">Usuario</label>
+        <input
+          type="text"
+          id="nombreUsuario"
+          class="form-control"
+          formControlName="nombreUsuario"
+          placeholder="mauricio"
+          autocomplete="username"
+        >
+      </div>
+
+      <div class="mb-4">
+        <label for="contrasena">Contraseña</label>
+        <input
+          type="password"
+          id="contrasena"
+          class="form-control"
+          formControlName="contrasena"
+          placeholder="******"
+          autocomplete="current-password"
+        >
+      </div>
+
+      <button type="submit" class="btn btn-ingresar w-100 fw-bold" [disabled]="cargando()">
+        {{ cargando() ? 'Ingresando...' : 'Ingresar' }}
+      </button>
+    </form>
+
+    <div class="mt-3 pt-3 border-top border-secondary-subtle text-center">
+      <small class="d-block mb-2 text-muted">Acceso rápido (Clave: 1234)</small>
+      <div class="d-flex justify-content-center gap-1 flex-wrap">
+        <button type="button" class="btn btn-sm btn-outline-minimal" (click)="usarCuentaRapida('admin')">admin</button>
+        <button type="button" class="btn btn-sm btn-outline-minimal" (click)="usarCuentaRapida('mauricio')">mauricio</button>
+        <button type="button" class="btn btn-sm btn-outline-minimal" (click)="usarCuentaRapida('aitana')">aitana</button>
+        <button type="button" class="btn btn-sm btn-outline-minimal" (click)="usarCuentaRapida('lamine')">lamine</button>
+      </div>
+    </div>
+  </div>
+</div>
