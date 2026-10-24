@@ -40,8 +40,10 @@ Una vez que la terminal indique que los servicios iniciaron, abre el navegador e
 ## Credenciales de Acceso (Usuarios de Prueba)
 Se cuenta con autenticación JWT, protección de rutas (authGuard) y control de acceso basado en roles (ADMIN y USUARIO). Las siguientes credenciales generadas por la carga inicial (o los botones de acceso rápido en la pantalla de Login) son para evaluar cada módulo:
 
+```bash
 ROL             Usuario         Correo                          Contraseña
 Administrador   admin           admin@organizacion.com          1234
 Usuario         mauricio        mauricio@organizacion.com       1234
 Usuario         aitana          aitana@organizacion.com         1234
 Usuario         lamine          lamine@organizacion.com         1234
+```
