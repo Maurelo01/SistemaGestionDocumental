@@ -1,0 +1,128 @@
+<div class="row g-4">
+  <div class="col-md-6">
+    <div class="card content-card border-0 p-4 shadow-sm h-100">
+      <h5 class="fw-bold text-dark-blue mb-3">Compartidos Conmigo ({{ recibidos().length }})</h5>
+      <div class="table-responsive">
+        <table class="table table-sm table-hover align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>Recurso</th>
+              <th>Usuario</th>
+              <th>Permisos</th>
+              <th class="text-end">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of recibidos(); track item._id) {
+              <tr>
+                <td class="fw-bold text-dark-blue">
+                  <i class="fa-solid me-1" [ngClass]="item.tipoRecurso === 'CARPETA' ? 'fa-folder' : 'fa-file'"></i>
+                  {{ item.recurso?.nombre }}
+                </td>
+                <td>{{ item.propietarioId?.nombreUsuario }}</td>
+                <td>{{ item.nivelAcceso }}</td>
+                <td class="text-end">
+                  <button class="btn btn-sm btn-outline-minimal" (click)="abrirRecursoRecibido(item)">
+                    Abrir
+                  </button>
+                </td>
+              </tr>
+            } @empty {
+              <tr><td colspan="4" class="text-center text-muted py-3">Sin recursos compartidos contigo.</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <div class="card content-card border-0 p-4 shadow-sm h-100">
+      <h5 class="fw-bold text-dark-blue mb-3">Compartidos por Mí ({{ enviados().length }})</h5>
+      <div class="table-responsive">
+        <table class="table table-sm table-hover align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>Recurso</th>
+              <th>Usuario</th>
+              <th>Permisos</th>
+              <th class="text-end">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of enviados(); track item._id) {
+              <tr>
+                <td class="fw-bold text-dark-blue">
+                  <i class="fa-solid me-1" [ngClass]="item.tipoRecurso === 'CARPETA' ? 'fa-folder' : 'fa-file'"></i>
+                  {{ item.recurso?.nombre }}
+                </td>
+                <td>{{ item.compartidoConId?.nombreUsuario }}</td>
+                <td style="width: 135px;">
+                  <select
+                    class="form-select form-select-sm"
+                    [ngModel]="item.nivelAcceso"
+                    (ngModelChange)="cambiarNivelPermiso(item, $event)"
+                  >
+                    <option value="LECTURA">LECTURA</option>
+                    <option value="COMENTAR">COMENTAR</option>
+                    <option value="EDICION">EDICION</option>
+                  </select>
+                </td>
+                <td class="text-end">
+                  <button class="btn btn-sm btn-outline-danger" (click)="revocarAcceso(item._id)">Retirar</button>
+                </td>
+              </tr>
+            } @empty {
+              <tr><td colspan="4" class="text-center text-muted py-3">No has compartido recursos.</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  @if (carpetaCompartidaAbierta(); as carp) {
+    <div class="col-12">
+      <div class="card content-card border-0 p-4 shadow-sm">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="fw-bold text-dark-blue m-0">
+            <i class="fa-solid fa-folder-open me-2"></i>Contenido de Carpeta Compartida: {{ carp.nombre }}
+          </h5>
+          <button class="btn btn-sm btn-light border" (click)="carpetaCompartidaAbierta.set(null)">Cerrar Carpeta</button>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-sm table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Archivo</th>
+                <th class="text-end">Acción</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (arch of archivosCarpetaCompartida(); track arch._id) {
+                <tr>
+                  <td class="fw-bold text-dark-blue">
+                    <i class="fa-solid fa-file me-1"></i>{{ arch.nombre }}{{ arch.extension }}
+                  </td>
+                  <td class="text-end">
+                    <button class="btn btn-sm btn-outline-minimal" (click)="archivoSeleccionadoId.set(arch._id)">
+                      Abrir Documento
+                    </button>
+                  </td>
+                </tr>
+              } @empty {
+                <tr><td colspan="2" class="text-center text-muted py-3">Esta carpeta compartida no contiene archivos.</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (archivoSeleccionadoId(); as idArchivo) {
+    <div class="col-12">
+      <app-visor-archivo [archivoId]="idArchivo" (cerrar)="archivoSeleccionadoId.set(null)" />
+    </div>
+  }
+</div>

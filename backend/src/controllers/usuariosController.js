@@ -37,10 +37,11 @@ const listarUsuarios = async (req, res) =>
     }
 };
 
-const crearUsuario = async (req, res) => {
+const crearUsuario = async (req, res) =>
+{
     try
     {
-        const { nombreUsuario, correo, contrasena, rol } = req.body;
+        const { nombreUsuario, correo, contrasena, rol, bytesAsignados } = req.body;
 
         if (!nombreUsuario || !correo || !contrasena)
         {
@@ -76,6 +77,12 @@ const crearUsuario = async (req, res) => {
             contrasenaHash,
             rol: rol === 'ADMIN' ? 'ADMIN' : 'USUARIO',
             activo: true,
+            almacenamiento:
+            {
+                bytesAsignados: Number(bytesAsignados) > 0 ? Number(bytesAsignados) : 10 * 1024 * 1024,
+                bytesUsados: 0,
+                cantidadArchivos: 0,
+            },
         });
 
         return res.status(201).json
@@ -158,4 +165,59 @@ const cambiarEstadoUsuario = async (req, res) =>
     }
 };
 
-module.exports = { listarUsuarios, crearUsuario, cambiarEstadoUsuario };
+const cambiarCuotaAlmacenamiento = async (req, res) =>
+{
+    try
+    {
+        const { id } = req.params;
+        const { bytesAsignados } = req.body;
+        const nuevaCuota = Number(bytesAsignados);
+
+        if (!nuevaCuota || nuevaCuota <= 0)
+        {
+            return res.status(400).json({
+                exito: false,
+                mensaje: 'La cuota de almacenamiento debe ser mayor a 0 bytes.',
+            });
+        }
+
+        const usuario = await Usuario.findById(id);
+        if (!usuario)
+        {
+            return res.status(404).json({ exito: false, mensaje: 'Usuario no encontrado.' });
+        }
+
+        if (nuevaCuota < usuario.almacenamiento.bytesUsados)
+        {
+            return res.status(400).json({
+                exito: false,
+                mensaje: `No puedes asignar una cuota menor al espacio que el usuario ya tiene ocupado (${usuario.almacenamiento.bytesUsados} bytes).`,
+            });
+        }
+
+        usuario.almacenamiento.bytesAsignados = nuevaCuota;
+        await usuario.save();
+
+        return res.status(200).json({
+            exito: true,
+            mensaje: 'Almacenamiento asignado actualizado correctamente.',
+            datos: usuario,
+        });
+    }
+    catch (error)
+    {
+        return res.status(500).json({
+            exito: false,
+            mensaje: 'Error al actualizar el almacenamiento asignado.',
+            error: error.message,
+        });
+    }
+};
+
+module.exports =
+{
+    listarUsuarios,
+    crearUsuario,
+    cambiarEstadoUsuario,
+    cambiarCuotaAlmacenamiento,
+};

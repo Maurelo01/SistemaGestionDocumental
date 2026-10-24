@@ -33,6 +33,18 @@ const reporteArchivosMasOperaciones = responderReporte
     'Error al generar reporte de archivos con más operaciones.'
 );
 
+const reporteArchivosNuncaCompartidos = responderReporte
+(
+    () => reportesServicio.obtenerArchivosNuncaCompartidos(),
+    'Error al generar reporte de archivos nunca compartidos.'
+);
+
+const reporteCarpetasMasArchivos = responderReporte
+(
+    (req) => reportesServicio.obtenerCarpetasConMasArchivos(req.query.limite),
+    'Error al generar reporte de carpetas con más archivos.'
+);
+
 // Reportes de usuarios
 const reporteTopUsuariosArchivos = responderReporte
 (
@@ -104,4 +116,6 @@ module.exports =
     reporteOperacionesPorTipo,
     reporteOperacionesPorPeriodo,
     reportePrincipalesAcciones,
+    reporteArchivosNuncaCompartidos,
+    reporteCarpetasMasArchivos,
 };

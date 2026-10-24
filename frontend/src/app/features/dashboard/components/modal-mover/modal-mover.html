@@ -1,0 +1,130 @@
+<div class="modal-backdrop-custom" (click)="cerrar.emit()">
+  <div
+    class="modal-explorer shadow-lg"
+    [class.maximizado]="maximizado()"
+    (click)="$event.stopPropagation()"
+  >
+    <div
+      class="modal-explorer-header d-flex justify-content-between align-items-center px-4 py-3"
+      (dblclick)="alternarTamano()"
+    >
+      <div class="d-flex align-items-center gap-2">
+        <i class="fa-solid" [ngClass]="recurso.tipo === 'CARPETA' ? 'fa-folder text-accent' : 'fa-file text-accent'"></i>
+        <h6 class="m-0 fw-bold">Mover "{{ recurso.nombre }}"</h6>
+      </div>
+
+      <div class="d-flex align-items-center gap-3">
+        <button
+          type="button"
+          class="btn btn-sm text-light p-0 border-0 opacity-75"
+          (click)="alternarTamano()"
+          [title]="maximizado() ? 'Restaurar tamaño' : 'Maximizar ventana'"
+        >
+          <i class="fa-solid" [ngClass]="maximizado() ? 'fa-compress' : 'fa-expand'"></i>
+        </button>
+        <button
+          type="button"
+          class="btn-close btn-close-white m-0"
+          (click)="cerrar.emit()"
+          title="Cerrar"
+        ></button>
+      </div>
+    </div>
+
+    <div class="explorer-toolbar d-flex align-items-center gap-2 px-3 py-2 border-bottom">
+      <button
+        type="button"
+        class="btn btn-sm btn-outline-minimal"
+        [disabled]="!carpetaUbicacion()"
+        (click)="subirUnNivel()"
+        title="Subir un nivel"
+      >
+        <i class="fa-solid fa-arrow-up"></i>
+      </button>
+
+      <div class="d-flex align-items-center flex-wrap gap-1 small">
+        <button
+          type="button"
+          class="btn btn-sm btn-link text-dark-blue text-decoration-none fw-bold p-1"
+          (click)="navegarA(null)"
+        >
+          <i class="fa-solid fa-hard-drive me-1"></i>Mi Unidad
+        </button>
+
+        @for (miga of rutaMigas(); track miga._id) {
+          <span class="text-muted"><i class="fa-solid fa-chevron-right" style="font-size: 0.7rem;"></i></span>
+          <button
+            type="button"
+            class="btn btn-sm btn-link text-dark-blue text-decoration-none p-1"
+            (click)="navegarA(miga._id)"
+          >
+            {{ miga.nombre }}
+          </button>
+        }
+
+        @if (carpetaUbicacion(); as actual) {
+          <span class="text-muted"><i class="fa-solid fa-chevron-right" style="font-size: 0.7rem;"></i></span>
+          <span class="badge bg-dark-blue">{{ actual.nombre }}</span>
+        }
+      </div>
+    </div>
+
+    <div class="explorer-body p-2" (click)="carpetaSeleccionada.set(null)">
+      @if (cargando()) {
+        <div class="text-center text-muted py-5 small">Cargando carpetas...</div>
+      } @else {
+        @for (c of subcarpetas(); track c._id) {
+          <div
+            class="explorer-row d-flex justify-content-between align-items-center px-3 py-2 rounded"
+            [class.selected]="carpetaSeleccionada()?._id === c._id"
+            [class.disabled-row]="c._id === recurso.id"
+            (click)="$event.stopPropagation(); seleccionarCarpeta(c)"
+            (dblclick)="navegarA(c._id)"
+          >
+            <div class="d-flex align-items-center gap-2">
+              <i class="fa-solid fa-folder fs-5" style="color: #D4AF37;"></i>
+              <span class="fw-semibold text-dark-blue">{{ c.nombre }}</span>
+              @if (c._id === recurso.id) {
+                <span class="badge bg-secondary small">Elemento actual</span>
+              }
+            </div>
+
+            @if (c._id !== recurso.id) {
+              <button
+                type="button"
+                class="btn btn-sm btn-light border py-0 px-2 small"
+                (click)="$event.stopPropagation(); navegarA(c._id)"
+                title="Entrar a esta carpeta"
+              >
+                Abrir <i class="fa-solid fa-chevron-right ms-1" style="font-size: 0.7rem;"></i>
+              </button>
+            }
+          </div>
+        } @empty {
+          <div class="text-center text-muted py-5">
+            <i class="fa-regular fa-folder-open fs-2 d-block mb-2 opacity-50"></i>
+            <span class="small">Esta carpeta no tiene subcarpetas. Puedes mover el elemento aquí.</span>
+          </div>
+        }
+      }
+    </div>
+
+    <div class="modal-explorer-footer d-flex justify-content-between align-items-center px-4 py-3 border-top">
+      <div class="small text-truncate me-2">
+        <span class="text-muted">Destino: </span>
+        <strong class="text-dark-blue">
+          <i class="fa-solid fa-folder-tree me-1 text-accent"></i>{{ destinoNombre }}
+        </strong>
+      </div>
+
+      <div class="d-flex gap-2">
+        <button type="button" class="btn btn-sm btn-outline-minimal px-3" (click)="cerrar.emit()">
+          Cancelar
+        </button>
+        <button type="button" class="btn btn-sm btn-minimal fw-bold px-4" (click)="confirmarMoverAqui()">
+          Mover aquí
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

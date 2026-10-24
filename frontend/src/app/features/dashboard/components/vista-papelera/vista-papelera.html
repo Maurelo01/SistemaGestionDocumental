@@ -1,0 +1,69 @@
+<div class="row g-4">
+  <div class="col-md-5">
+    <div class="card content-card border-0 p-4 shadow-sm h-100">
+      <h5 class="fw-bold text-dark-blue mb-3">Carpetas en Papelera ({{ carpetas().length }})</h5>
+      <div class="table-responsive">
+        <table class="table table-sm align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>Carpeta</th>
+              <th>Eliminada</th>
+              <th class="text-end">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (c of carpetas(); track c._id) {
+              <tr>
+                <td class="fw-bold text-dark-blue"><i class="fa-sharp fa-solid fa-folder"></i> {{ c.nombre }}</td>
+                <td class="small text-muted">{{ c.papelera.fechaEliminacion | date:'dd/MM/yyyy' }}</td>
+                <td class="text-end">
+                  <div class="btn-group btn-group-sm">
+                    <button class="btn btn-outline-minimal" (click)="restaurar('CARPETA', c._id)">Restaurar</button>
+                    <button class="btn btn-outline-danger" (click)="eliminarPermanente('CARPETA', c._id, c.nombre)">Eliminar</button>
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr><td colspan="3" class="text-center text-muted py-4">No hay carpetas en la papelera.</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-7">
+    <div class="card content-card border-0 p-4 shadow-sm h-100">
+      <h5 class="fw-bold text-dark-blue mb-3">Archivos en Papelera ({{ archivos().length }})</h5>
+      <div class="table-responsive">
+        <table class="table table-sm align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>Archivo</th>
+              <th>Tamaño</th>
+              <th>Eliminado</th>
+              <th class="text-end">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (a of archivos(); track a._id) {
+              <tr>
+                <td class="fw-bold text-dark-blue"><i class="fa-sharp fa-solid fa-file"></i> {{ a.nombre }}{{ a.extension }}</td>
+                <td class="small">{{ formatearBytes(a.tamanoBytes) }}</td>
+                <td class="small text-muted">{{ a.papelera.fechaEliminacion | date:'dd/MM/yyyy HH:mm' }}</td>
+                <td class="text-end">
+                  <div class="btn-group btn-group-sm">
+                    <button class="btn btn-outline-minimal" (click)="restaurar('ARCHIVO', a._id)">Restaurar</button>
+                    <button class="btn btn-outline-danger" (click)="eliminarPermanente('ARCHIVO', a._id, a.nombre)">Eliminar</button>
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr><td colspan="4" class="text-center text-muted py-4">No hay archivos en la papelera.</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

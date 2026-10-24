@@ -37,10 +37,10 @@
             </li>
           }
           <li class="nav-item">
-            <a class="nav-link nav-minimal" [class.active]="vistaActual() === 'reportes'" (click)="cambiarVista('reportes')" style="cursor: pointer;">
-              Reportes
-            </a>
-          </li>
+              <a class="nav-link nav-minimal" [class.active]="vistaActual() === 'reportes'" (click)="cambiarVista('reportes')" style="cursor: pointer;">
+                Reportes
+              </a>
+            </li>
           <li class="nav-item ms-lg-3 mt-2 mt-lg-0">
             <button (click)="authService.cerrarSesion()" class="btn btn-outline-accent fw-bold btn-sm px-3 py-2">
               Cerrar Sesión
@@ -60,13 +60,16 @@
             @case ('compartidos') { Recursos Compartidos }
             @case ('papelera') { Papelera de Reciclaje }
             @case ('usuarios') { Administración de Usuarios }
-            @case ('reportes') { Módulo de Reportes y Auditoría }
+            @case ('reportes') { Módulo de Reportes }
           }
         </h3>
 
-        <div class="d-flex align-items-center gap-2">
+        <div class="d-flex align-items-center gap-2 flex-wrap">
           <div class="badge bg-dark-blue p-2 fs-6 rounded-3 shadow-sm">
-            Espacio: {{ formatearBytes(usuario.almacenamiento.bytesUsados) }} ({{ usuario.almacenamiento.cantidadArchivos }} archivos)
+            Asignado: {{ formatearBytes(usuario.almacenamiento.bytesAsignados || 5242880) }}
+            | Usado: {{ formatearBytes(usuario.almacenamiento.bytesUsados) }}
+            | Disponible: {{ formatearBytes((usuario.almacenamiento.bytesAsignados || 5242880) - usuario.almacenamiento.bytesUsados) }}
+            ({{ usuario.almacenamiento.cantidadArchivos }} arch.)
           </div>
           <div class="badge bg-dark-blue p-2 fs-6 rounded-3 shadow-sm">
             {{ usuario.rol }}: <span class="text-accent">{{ usuario.nombreUsuario }}</span>
@@ -75,10 +78,22 @@
       </div>
     }
 
-    <div class="card content-card border-0 p-4 shadow-sm">
-      <p class="text-muted m-0">
-        Vista activa: <strong class="text-dark-blue">{{ vistaActual() | uppercase }}</strong>
-      </p>
-    </div>
+    @switch (vistaActual()) {
+      @case ('unidad') {
+        <app-explorador-unidad />
+      }
+      @case ('compartidos') {
+        <app-vista-compartidos />
+      }
+      @case ('papelera') {
+        <app-vista-papelera />
+      }
+      @case ('usuarios') {
+        <app-vista-usuarios />
+      }
+      @case ('reportes') {
+        <app-vista-reportes />
+      }
+    }
   </div>
 </div>

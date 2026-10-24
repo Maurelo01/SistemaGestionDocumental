@@ -1,0 +1,136 @@
+<div class="row g-4">
+  <!-- Columna Izquierda: Formulario de Creación -->
+  <div class="col-md-4">
+    <div class="card content-card border-0 p-4 shadow-sm">
+      <h5 class="fw-bold text-dark-blue mb-3">Registrar Nuevo Usuario</h5>
+
+      <form (ngSubmit)="registrarUsuario()">
+        <div class="mb-3">
+          <label class="form-label small fw-bold">Nombre de Usuario</label>
+          <input
+            type="text"
+            class="form-control form-control-sm"
+            name="nombreUsuario"
+            placeholder="Ej. roberto"
+            [(ngModel)]="nuevoUsuario.nombreUsuario"
+            required
+          >
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label small fw-bold">Correo Institucional</label>
+          <input
+            type="email"
+            class="form-control form-control-sm"
+            name="correo"
+            placeholder="roberto@organizacion.com"
+            [(ngModel)]="nuevoUsuario.correo"
+            required
+          >
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label small fw-bold">Contraseña</label>
+          <input
+            type="password"
+            class="form-control form-control-sm"
+            name="contrasena"
+            placeholder="Mínimo 4 caracteres"
+            [(ngModel)]="nuevoUsuario.contrasena"
+            required
+          >
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label small fw-bold">Rol en la Plataforma</label>
+          <select class="form-select form-select-sm" name="rol" [(ngModel)]="nuevoUsuario.rol">
+            <option value="USUARIO">USUARIO</option>
+            <option value="ADMIN">ADMIN</option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn btn-minimal w-100 fw-bold btn-sm py-2">
+          Crear Usuario
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <div class="col-md-8">
+    <div class="card content-card border-0 p-4 shadow-sm">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+        <h5 class="fw-bold text-dark-blue m-0">Directorio de Usuarios ({{ usuarios().length }})</h5>
+
+        <div class="d-flex align-items-center gap-2">
+          <input
+            type="text"
+            class="form-control form-control-sm"
+            placeholder="Buscar usuario o correo..."
+            [(ngModel)]="terminoBusqueda"
+            (keyup.enter)="cargarUsuarios()"
+            style="width: 200px;"
+          >
+          <div class="form-check form-switch m-0 d-flex align-items-center gap-1">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              id="checkActivos"
+              [(ngModel)]="filtroSoloActivos"
+              (change)="cargarUsuarios()"
+            >
+            <label class="form-check-label small" for="checkActivos">Solo activos</label>
+          </div>
+          <button class="btn btn-sm btn-minimal" (click)="cargarUsuarios()">Filtrar</button>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-sm table-hover align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>Usuario</th>
+              <th>Correo</th>
+              <th>Rol</th>
+              <th>Almacenamiento</th>
+              <th>Estado</th>
+              <th class="text-end">Acción</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (u of usuarios(); track u._id) {
+              <tr>
+                <td class="fw-bold text-dark-blue">{{ u.nombreUsuario }}</td>
+                <td class="small">{{ u.correo }}</td>
+                <td>{{ u.rol }}</td>
+                <td class="small">
+                  {{ formatearBytes(u.almacenamiento.bytesUsados) }} ({{ u.almacenamiento.cantidadArchivos }} arch.)
+                </td>
+                <td>
+                  <span class="badge" [ngClass]="u.activo ? 'text-bg-success' : 'text-bg-danger'">
+                    {{ u.activo ? 'ACTIVO' : 'INACTIVO' }}
+                  </span>
+                </td>
+                <td class="text-end">
+                 <div class="btn-group btn-group-sm">
+                    <button class="btn btn-outline-minimal" (click)="modificarCuotaUsuario(u)">Cuota</button>
+                    @if (u._id !== authService.obtenerUsuarioActual()?._id) {
+                      <button
+                        class="btn"
+                        [ngClass]="u.activo ? 'btn-outline-danger' : 'btn-outline-minimal'"
+                        (click)="alternarEstadoUsuario(u)"
+                      >
+                        {{ u.activo ? 'Desactivar' : 'Activar' }}
+                      </button>
+                    }
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr><td colspan="6" class="text-center text-muted py-4">No se encontraron usuarios.</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

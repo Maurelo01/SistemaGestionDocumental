@@ -1,0 +1,545 @@
+<div class="d-flex gap-2 flex-wrap mb-4">
+  @if (authService.esAdmin()) {
+    <button
+      class="btn btn-sm fw-bold px-3 py-2"
+      [ngClass]="categoriaActiva() === 'archivos' ? 'btn-minimal' : 'btn-outline-minimal'"
+      (click)="cambiarCategoria('archivos')"
+    >
+      1. Archivos y Almacenamiento
+    </button>
+    <button
+      class="btn btn-sm fw-bold px-3 py-2"
+      [ngClass]="categoriaActiva() === 'usuarios' ? 'btn-minimal' : 'btn-outline-minimal'"
+      (click)="cambiarCategoria('usuarios')"
+    >
+      2. Usuarios
+    </button>
+  }
+  <button
+    class="btn btn-sm fw-bold px-3 py-2"
+    [ngClass]="categoriaActiva() === 'comparticion' ? 'btn-minimal' : 'btn-outline-minimal'"
+    (click)="cambiarCategoria('comparticion')"
+  >
+    {{ authService.esAdmin() ? '3. Compartición y Permisos' : 'Mis Recursos Compartidos y Recibidos' }}
+  </button>
+  <button
+    class="btn btn-sm fw-bold px-3 py-2"
+    [ngClass]="categoriaActiva() === 'actividad' ? 'btn-minimal' : 'btn-outline-minimal'"
+    (click)="cambiarCategoria('actividad')"
+  >
+    {{ authService.esAdmin() ? '4. Historial de Actividad' : 'Mi Historial de Actividad' }}
+  </button>
+</div>
+
+@if (categoriaActiva() === 'archivos' && authService.esAdmin()) {
+  <div class="row g-4">
+    <div class="col-md-5">
+      <div class="card content-card border-0 p-4 shadow-sm h-100">
+        <h5 class="fw-bold text-dark-blue mb-3">1. Archivos Agrupados por Tipo</h5>
+        <div class="table-responsive">
+          <table class="table table-sm align-middle">
+            <thead class="table-light">
+              <tr>
+                <th>Extensión</th>
+                <th>Cantidad</th>
+                <th>Espacio Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of rep1ArchivosPorTipo(); track item.tipo) {
+                <tr>
+                  <td class="fw-bold text-dark-blue">{{ item.tipo }}</td>
+                  <td>{{ item.cantidad }} archivos</td>
+                  <td>{{ formatearBytes(item.tamanoTotalBytes) }}</td>
+                </tr>
+              } @empty {
+                <tr><td colspan="3" class="text-center text-muted">Sin datos.</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-7">
+      <div class="card content-card border-0 p-4 shadow-sm h-100">
+        <h5 class="fw-bold text-dark-blue mb-3">3. Archivos con Mayor Cantidad de Operaciones</h5>
+        <div class="table-responsive" style="max-height: 260px; overflow-y: auto;">
+          <table class="table table-sm table-hover align-middle">
+            <thead class="table-light sticky-top">
+              <tr>
+                <th>Documento</th>
+                <th>Operaciones</th>
+                <th>Última Operación</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of rep3ArchivosMasOperaciones(); track item.archivoId) {
+                <tr>
+                  <td class="fw-bold text-dark-blue">{{ item.nombre }}{{ item.extension }}</td>
+                  <td>{{ item.cantidadOperaciones }} ops</td>
+                  <td class="small text-muted">{{ item.ultimaOperacion | date:'dd/MM/yyyy HH:mm' }}</td>
+                </tr>
+              } @empty {
+                <tr><td colspan="3" class="text-center text-muted">Sin datos.</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12">
+    <div class="card content-card border-0 p-4 shadow-sm">
+      <h5 class="fw-bold text-dark-blue mb-3">Carpetas con Mayor Cantidad de Archivos</h5>
+      <div class="table-responsive">
+        <table class="table table-sm table-hover align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>Nombre de Carpeta</th>
+              <th>Propietario</th>
+              <th>Cantidad de Archivos</th>
+              <th>Espacio Ocupado</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (c of rep14CarpetasMasArchivos(); track c.carpetaId) {
+              <tr>
+                <td class="fw-bold text-dark-blue">{{ c.nombreCarpeta }}</td>
+                <td>{{ c.propietario }}</td>
+                <td>{{ c.cantidadArchivos }} archivos</td>
+                <td>{{ formatearBytes(c.tamanoTotalBytes) }}</td>
+              </tr>
+            } @empty {
+              <tr><td colspan="4" class="text-center text-muted">Sin datos.</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+    <div class="col-12">
+      <div class="card content-card border-0 p-4 shadow-sm">
+        <h5 class="fw-bold text-dark-blue mb-3">2. Archivos Almacenados por Rango de Fechas</h5>
+
+        <div class="row g-2 mb-3 bg-light p-3 rounded align-items-end">
+          <div class="col-md-4">
+            <label class="form-label small fw-bold mb-1">Fecha Inicio</label>
+            <input type="date" class="form-control form-control-sm" [(ngModel)]="fechaInicioArchivos">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label small fw-bold mb-1">Fecha Fin</label>
+            <input type="date" class="form-control form-control-sm" [(ngModel)]="fechaFinArchivos">
+          </div>
+          <div class="col-md-4 d-flex gap-2">
+            <button class="btn btn-sm btn-minimal w-100 fw-bold" (click)="filtrarArchivosPorFechas()">
+              Filtrar por Fechas
+            </button>
+            <button class="btn btn-sm btn-outline-minimal" (click)="limpiarFechasArchivos()">
+              Todos
+            </button>
+          </div>
+        </div>
+
+        <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+          <table class="table table-sm table-hover align-middle">
+            <thead class="table-light sticky-top">
+              <tr>
+                <th>Documento</th>
+                <th>Propietario</th>
+                <th>Carpeta</th>
+                <th>Tamaño</th>
+                <th>Fecha Creación</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (a of rep2ArchivosPorFechas(); track a._id) {
+                <tr>
+                  <td class="fw-bold text-dark-blue">{{ a.nombre }}{{ a.extension }}</td>
+                  <td>{{ a.propietario }}</td>
+                  <td>{{ a.carpeta }}</td>
+                  <td class="small">{{ formatearBytes(a.tamanoBytes) }}</td>
+                  <td class="small text-muted">{{ a.fechaCreacion | date:'dd/MM/yyyy HH:mm' }}</td>
+                </tr>
+              } @empty {
+                <tr><td colspan="5" class="text-center text-muted py-3">No hay archivos en ese rango de fechas.</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+@if (categoriaActiva() === 'usuarios' && authService.esAdmin()) {
+  <div class="row g-4">
+    <div class="col-md-6">
+      <div class="card content-card border-0 p-4 shadow-sm h-100">
+        <h5 class="fw-bold text-dark-blue mb-3">4. Top 10 Usuarios con Más Archivos</h5>
+        <div class="table-responsive">
+          <table class="table table-sm table-hover align-middle">
+            <thead class="table-light">
+              <tr>
+                <th>Usuario</th>
+                <th>Rol</th>
+                <th>Archivos</th>
+                <th>Espacio Usado</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (u of rep4TopUsuariosArchivos(); track u._id) {
+                <tr>
+                  <td class="fw-bold text-dark-blue">{{ u.nombreUsuario }}</td>
+                  <td>{{ u.rol }}</td>
+                  <td>{{ u.cantidadArchivos }}</td>
+                  <td>{{ formatearBytes(u.bytesUsados) }}</td>
+                </tr>
+              } @empty {
+                <tr><td colspan="4" class="text-center text-muted">Sin datos.</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card content-card border-0 p-4 shadow-sm h-100">
+        <h5 class="fw-bold text-dark-blue mb-3">5. Usuarios que Más Comparten Recursos</h5>
+        <div class="table-responsive">
+          <table class="table table-sm table-hover align-middle">
+            <thead class="table-light">
+              <tr>
+                <th>Usuario</th>
+                <th>Total Compartidos</th>
+                <th>Archivos</th>
+                <th>Carpetas</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (u of rep5UsuariosMasCompartidos(); track u.usuarioId) {
+                <tr>
+                  <td class="fw-bold text-dark-blue">{{ u.nombreUsuario }}</td>
+                  <td>{{ u.totalCompartidos }}</td>
+                  <td>{{ u.archivosCompartidos }}</td>
+                  <td>{{ u.carpetasCompartidas }}</td>
+                </tr>
+              } @empty {
+                <tr><td colspan="4" class="text-center text-muted">Sin datos.</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+@if (categoriaActiva() === 'comparticion') {
+  <div class="row g-4">
+    @if (authService.esAdmin()) {
+      <div class="col-12">
+        <div class="card content-card border-0 p-4 shadow-sm">
+          <h5 class="fw-bold text-dark-blue mb-3">6. Archivos Compartidos con Mayor Cantidad de Usuarios</h5>
+          <div class="table-responsive">
+            <table class="table table-sm table-hover align-middle">
+              <thead class="table-light">
+                <tr>
+                  <th>Documento</th>
+                  <th>Propietario</th>
+                  <th>Usuarios con Acceso</th>
+                  <th>Niveles Otorgados</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (a of rep6ArchivosMasCompartidos(); track a.archivoId) {
+                  <tr>
+                    <td class="fw-bold text-dark-blue">{{ a.nombre }}{{ a.extension }}</td>
+                    <td>{{ a.propietario }}</td>
+                    <td>{{ a.cantidadUsuarios }} usuarios</td>
+                    <td>{{ a.nivelesOtorgados?.join(', ') }}</td>
+                  </tr>
+                } @empty {
+                  <tr><td colspan="4" class="text-center text-muted">Sin datos.</td></tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12">
+      <div class="card content-card border-0 p-4 shadow-sm">
+        <h5 class="fw-bold text-dark-blue mb-3">Archivos que Nunca han sido Compartidos ({{ rep13ArchivosNuncaCompartidos().length }})</h5>
+        <div class="table-responsive" style="max-height: 260px; overflow-y: auto;">
+          <table class="table table-sm table-hover align-middle">
+            <thead class="table-light sticky-top">
+              <tr>
+                <th>Documento</th>
+                <th>Propietario</th>
+                <th>Carpeta</th>
+                <th>Tamaño</th>
+                <th>Fecha Creación</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (a of rep13ArchivosNuncaCompartidos(); track a._id) {
+                <tr>
+                  <td class="fw-bold text-dark-blue">{{ a.nombre }}{{ a.extension }}</td>
+                  <td>{{ a.propietario }}</td>
+                  <td>{{ a.carpeta }}</td>
+                  <td class="small">{{ formatearBytes(a.tamanoBytes) }}</td>
+                  <td class="small text-muted">{{ a.fechaCreacion | date:'dd/MM/yyyy HH:mm' }}</td>
+                </tr>
+              } @empty {
+                <tr><td colspan="5" class="text-center text-muted">Todos los archivos han sido compartidos.</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+      <div class="col-12">
+        <div class="card content-card border-0 p-3 shadow-sm bg-light">
+          <div class="d-flex align-items-center gap-3 flex-wrap">
+            <label class="fw-bold text-dark-blue m-0">Seleccionar Usuario para Reportes 7 y 8:</label>
+            <select
+              class="form-select form-select-sm"
+              style="width: 260px;"
+              [(ngModel)]="usuarioSeleccionadoCompId"
+              (change)="consultarReportesUsuarioComparticion()"
+            >
+              @for (u of listaUsuarios(); track u._id) {
+                <option [value]="u._id">{{ u.nombreUsuario }} ({{ u.correo }})</option>
+              }
+            </select>
+          </div>
+        </div>
+      </div>
+    }
+
+    <div class="col-md-6">
+      <div class="card content-card border-0 p-4 shadow-sm h-100">
+        <h5 class="fw-bold text-dark-blue mb-3">
+          {{ authService.esAdmin() ? '7. Recursos Compartidos por el Usuario' : 'Recursos Compartidos por Mí' }}
+        </h5>
+        <div class="table-responsive">
+          <table class="table table-sm table-hover align-middle">
+            <thead class="table-light">
+              <tr>
+                <th>Recurso</th>
+                <th>Tipo</th>
+                <th>Compartido Con</th>
+                <th>Permisos</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (r of rep7CompartidosPorUsuario(); track r._id) {
+                <tr>
+                  <td class="fw-bold text-dark-blue">{{ r.nombreRecurso }}{{ r.extension || '' }}</td>
+                  <td class="small">{{ r.tipoRecurso }}</td>
+                  <td>{{ r.compartidoCon }}</td>
+                  <td>{{ r.nivelAcceso }}</td>
+                </tr>
+              } @empty {
+                <tr><td colspan="4" class="text-center text-muted py-3">No se han compartido recursos.</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card content-card border-0 p-4 shadow-sm h-100">
+        <h5 class="fw-bold text-dark-blue mb-3">
+          {{ authService.esAdmin() ? '8. Recursos Recibidos por el Usuario' : 'Recursos Recibidos por Mí' }}
+        </h5>
+        <div class="table-responsive">
+          <table class="table table-sm table-hover align-middle">
+            <thead class="table-light">
+              <tr>
+                <th>Recurso</th>
+                <th>Tipo</th>
+                <th>Propietario</th>
+                <th>Permisos</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (r of rep8RecibidosPorUsuario(); track r._id) {
+                <tr>
+                  <td class="fw-bold text-dark-blue">{{ r.nombreRecurso }}{{ r.extension || '' }}</td>
+                  <td class="small">{{ r.tipoRecurso }}</td>
+                  <td>{{ r.propietario }}</td>
+                  <td>{{ r.nivelAcceso }}</td>
+                </tr>
+              } @empty {
+                <tr><td colspan="4" class="text-center text-muted py-3">No se han recibido recursos.</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+@if (categoriaActiva() === 'actividad') {
+  <div class="row g-4">
+    <div class="col-12">
+      <div class="card content-card border-0 p-4 shadow-sm">
+        <h5 class="fw-bold text-dark-blue mb-3">
+          {{ authService.esAdmin() ? '9. Historial de Actividad de Usuario por Rango de Fechas' : 'Mi Historial de Actividad por Rango de Fechas' }}
+        </h5>
+
+        <div class="row g-2 mb-3 bg-light p-3 rounded align-items-end">
+          @if (authService.esAdmin()) {
+            <div class="col-md-3">
+              <label class="form-label small fw-bold mb-1">Usuario</label>
+              <select class="form-select form-select-sm" [(ngModel)]="usuarioSeleccionadoActId">
+                @for (u of listaUsuarios(); track u._id) {
+                  <option [value]="u._id">{{ u.nombreUsuario }}</option>
+                }
+              </select>
+            </div>
+          }
+          <div [ngClass]="authService.esAdmin() ? 'col-md-3' : 'col-md-4'">
+            <label class="form-label small fw-bold mb-1">Fecha Inicio</label>
+            <input type="date" class="form-control form-control-sm" [(ngModel)]="fechaInicioActividad">
+          </div>
+          <div [ngClass]="authService.esAdmin() ? 'col-md-3' : 'col-md-4'">
+            <label class="form-label small fw-bold mb-1">Fecha Fin</label>
+            <input type="date" class="form-control form-control-sm" [(ngModel)]="fechaFinActividad">
+          </div>
+          <div [ngClass]="authService.esAdmin() ? 'col-md-3' : 'col-md-4'">
+            <button class="btn btn-sm btn-minimal w-100 fw-bold" (click)="consultarHistorialActividadUsuario()">
+              Consultar Historial
+            </button>
+          </div>
+        </div>
+
+        <div class="table-responsive" style="max-height: 280px; overflow-y: auto;">
+          <table class="table table-sm table-hover align-middle">
+            <thead class="table-light sticky-top">
+              <tr>
+                <th>Fecha y Hora</th>
+                <th>Acción</th>
+                <th>Recurso</th>
+                <th>Tipo</th>
+                <th>Detalles</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (act of rep9HistorialUsuario(); track act._id) {
+                <tr>
+                  <td class="small text-muted">{{ act.fechaCreacion | date:'dd/MM/yyyy HH:mm' }}</td>
+                  <td>{{ act.accion }}</td>
+                  <td class="fw-bold text-dark-blue">
+                    {{ act.datosRecurso?.nombre }}{{ act.datosRecurso?.extension || '' }}
+                  </td>
+                  <td class="small">{{ act.tipoRecurso }}</td>
+                  <td class="small">{{ act.detalles }}</td>
+                </tr>
+              } @empty {
+                <tr><td colspan="5" class="text-center text-muted py-3">No hay actividades registradas para este filtro.</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    @if (authService.esAdmin()) {
+      <div class="col-md-4">
+        <div class="card content-card border-0 p-4 shadow-sm h-100">
+          <h5 class="fw-bold text-dark-blue mb-3">10. Operaciones por Tipo</h5>
+          <div class="table-responsive">
+            <table class="table table-sm align-middle">
+              <thead class="table-light">
+                <tr>
+                  <th>Acción</th>
+                  <th class="text-end">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (op of rep10OperacionesPorTipo(); track op.accion) {
+                  <tr>
+                    <td>{{ op.accion }}</td>
+                    <td class="fw-bold text-end">{{ op.cantidad }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="card content-card border-0 p-4 shadow-sm h-100">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="fw-bold text-dark-blue m-0">11. Por Período</h5>
+            <select
+              class="form-select form-select-sm"
+              style="width: 95px;"
+              [(ngModel)]="periodoAgrupacion"
+              (change)="cambiarPeriodoOperaciones()"
+            >
+              <option value="dia">Por Día</option>
+              <option value="mes">Por Mes</option>
+            </select>
+          </div>
+          <div class="table-responsive" style="max-height: 260px; overflow-y: auto;">
+            <table class="table table-sm align-middle">
+              <thead class="table-light sticky-top">
+                <tr>
+                  <th>Período</th>
+                  <th class="text-end">Operaciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (p of rep11OperacionesPorPeriodo(); track p.periodo) {
+                  <tr>
+                    <td class="fw-bold text-dark-blue">{{ p.periodo }}</td>
+                    <td class="text-end fw-bold">{{ p.cantidad }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="card content-card border-0 p-4 shadow-sm h-100">
+          <h5 class="fw-bold text-dark-blue mb-3">12. Principales Acciones</h5>
+          <div class="table-responsive">
+            <table class="table table-sm align-middle">
+              <thead class="table-light">
+                <tr>
+                  <th>Acción / Recurso</th>
+                  <th>Cant.</th>
+                  <th>%</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (pa of rep12PrincipalesAcciones(); track $index) {
+                  <tr>
+                    <td>
+                      <strong class="text-dark-blue">{{ pa.accion }}</strong>
+                      <small class="d-block text-muted">{{ pa.tipoRecurso }}</small>
+                    </td>
+                    <td class="fw-bold">{{ pa.cantidad }}</td>
+                    <td>{{ pa.porcentaje }}%</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+}
