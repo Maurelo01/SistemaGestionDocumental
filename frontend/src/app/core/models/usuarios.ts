@@ -8,6 +8,7 @@ export interface RespuestaApi<T>
 
 export interface Almacenamiento
 {
+    bytesAsignados?: number;
     bytesUsados: number;
     cantidadArchivos: number;
 }
@@ -23,7 +24,7 @@ export interface Usuario
     activo: boolean;
     almacenamiento: Almacenamiento;
     fechaCreacion?: string;
-fechaActualizacion?: string;
+    fechaActualizacion?: string;
 }
 
 export interface DatosLogin

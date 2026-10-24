@@ -34,6 +34,23 @@ const obtenerArchivoValidado = async (archivoId, usuarioId, nivelRequerido = 'LE
     return { archivo, nivelAcceso: acceso.nivel };
 };
 
+const verificarEspacioDisponible = async (propietarioId, bytesAdicionales) =>
+{
+    if (bytesAdicionales <= 0) return;
+    const propietario = await Usuario.findById(propietarioId);
+    const asignado = propietario?.almacenamiento?.bytesAsignados || 10 * 1024 * 1024;
+    const usado = propietario?.almacenamiento?.bytesUsados || 0;
+
+    if (usado + bytesAdicionales > asignado)
+    {
+        throw crearError
+        (
+            400,
+            `Espacio insuficiente. Disponible: ${asignado - usado} bytes, requerido: ${bytesAdicionales} bytes.`
+        );
+    }
+};
+
 const listarYFiltrarArchivos = async (usuarioId, { buscar, extension, carpetaId, ordenarPor = 'fechaCreacion', orden = 'desc' }) =>
 {
     const filtro = { propietarioId: usuarioId, 'papelera.eliminado': false };
@@ -83,6 +100,7 @@ const guardarNuevoArchivo = async (usuario, body, archivoFisico) =>
     else carpetaId = null;
 
     const tamanoBytes = Buffer.byteLength(contenido, 'utf8');
+    await verificarEspacioDisponible(propietarioArchivoId, tamanoBytes);
     const nuevoArchivo = await Archivo.create
     ({
         nombre: nombre.trim(),
@@ -120,7 +138,8 @@ const actualizarContenido = async (archivoId, usuarioId, contenido) =>
     const { archivo } = await obtenerArchivoValidado(archivoId, usuarioId, 'EDICION');
     const nuevoTamano = Buffer.byteLength(contenido, 'utf8');
     const diferenciaBytes = nuevoTamano - archivo.tamanoBytes;
-
+    await verificarEspacioDisponible(archivo.propietarioId, diferenciaBytes);
+    
     archivo.contenido = contenido;
     archivo.tamanoBytes = nuevoTamano;
     await archivo.save();

@@ -1,0 +1,155 @@
+<div class="row g-4">
+  <div class="col-lg-4">
+    <div class="card content-card border-0 p-4 shadow-sm mb-4">
+      <h5 class="fw-bold text-dark-blue mb-3">Organización y Carga</h5>
+      <div class="mb-3">
+        <label class="form-label small fw-bold">Nueva Carpeta</label>
+        <div class="input-group input-group-sm">
+          <input type="text" class="form-control" placeholder="Nombre..." [(ngModel)]="nombreNuevaCarpeta">
+          <button class="btn btn-minimal fw-bold" (click)="crearCarpeta()">Crear</button>
+        </div>
+      </div>
+      <hr class="text-muted">
+      <div>
+        <label class="form-label small fw-bold">Subir archivo (.txt o .md)</label>
+        <input type="file" accept=".txt,.md" class="form-control form-control-sm" (change)="subirArchivoFisico($event)">
+      </div>
+    </div>
+
+    <div class="card content-card border-0 p-4 shadow-sm">
+      <h5 class="fw-bold text-dark-blue mb-3">Nuevo Documento</h5>
+      <div class="row g-2 mb-2">
+        <div class="col-8">
+          <input type="text" class="form-control form-control-sm" placeholder="Nombre..." [(ngModel)]="nuevoArchivo.nombre">
+        </div>
+        <div class="col-4">
+          <select class="form-select form-select-sm" [(ngModel)]="nuevoArchivo.extension">
+            <option value=".txt">.txt</option>
+            <option value=".md">.md</option>
+          </select>
+        </div>
+      </div>
+      <textarea rows="4" class="form-control form-control-sm mb-3" placeholder="Contenido..." [(ngModel)]="nuevoArchivo.contenido"></textarea>
+      <button class="btn btn-minimal w-100 fw-bold btn-sm py-2" (click)="crearArchivoTexto()">Guardar</button>
+    </div>
+  </div>
+
+  <div class="col-lg-8">
+    <div class="card content-card border-0 p-4 shadow-sm">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3 pb-2 border-bottom">
+        <div class="d-flex align-items-center flex-wrap gap-1">
+          <button class="btn btn-sm btn-outline-minimal fw-bold" (click)="cargarNivel(null)">Raíz</button>
+          @for (miga of rutaMigas(); track miga._id) {
+            <span class="text-muted">/</span>
+            <button class="btn btn-sm btn-link text-dark-blue text-decoration-none p-1" (click)="cargarNivel(miga._id)">{{ miga.nombre }}</button>
+          }
+          @if (carpetaActual()) {
+            <span class="text-muted">/</span>
+            <span class="fw-bold text-dark-blue">{{ carpetaActual()?.nombre }}</span>
+          }
+        </div>
+
+        <div class="d-flex gap-2">
+          <input
+            type="text"
+            class="form-control form-control-sm"
+            placeholder="Buscar..."
+            [ngModel]="terminoBusqueda()"
+            (ngModelChange)="terminoBusqueda.set($event)"
+            (keyup.enter)="aplicarFiltro()"
+            style="width: 150px;"
+          >
+          <select
+            class="form-select form-select-sm"
+            [ngModel]="filtroSeleccionado()"
+            (ngModelChange)="filtroSeleccionado.set($event); aplicarFiltro()"
+            style="width: 145px;"
+          >
+            <option value="TODOS">Todos</option>
+            <option value="CARPETAS">Solo Carpetas</option>
+            <option value="ARCHIVOS">Solo Archivos</option>
+            <option value=".txt">Archivos .txt</option>
+            <option value=".md">Archivos .md</option>
+          </select>
+          <button class="btn btn-sm btn-minimal" (click)="aplicarFiltro()">Filtrar</button>
+        </div>
+      </div>
+
+      @if (mostrarSeccionCarpetas()) {
+        <h6 class="fw-bold text-dark-blue mb-2">Carpetas ({{ carpetasVisibles().length }})</h6>
+        <div class="table-responsive mb-3">
+          <table class="table table-sm table-hover align-middle mb-0">
+            <tbody>
+              @for (c of carpetasVisibles(); track c._id) {
+                <tr>
+                  <td>
+                    <a href="javascript:void(0)" class="fw-bold text-dark-blue text-decoration-none" (click)="cargarNivel(c._id)">
+                      <i class="fa-sharp fa-solid fa-folder me-1"></i> {{ c.nombre }}
+                    </a>
+                  </td>
+                  <td class="text-end">
+                    <div class="btn-group btn-group-sm">
+                      <button class="btn btn-outline-minimal" (click)="renombrar('CARPETA', c._id, c.nombre)">Renombrar</button>
+                      <button class="btn btn-outline-minimal" (click)="mover('CARPETA', c._id, c.nombre)">Mover</button>
+                      <button class="btn btn-outline-minimal" (click)="compartir('CARPETA', c._id, c.nombre)">Compartir</button>
+                      <button class="btn btn-outline-danger" (click)="enviarAPapelera('CARPETA', c._id)">Papelera</button>
+                    </div>
+                  </td>
+                </tr>
+              } @empty {
+                <tr><td colspan="2" class="text-center text-muted small py-2">Sin carpetas.</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+
+      @if (mostrarSeccionArchivos()) {
+        <h6 class="fw-bold text-dark-blue mb-2">Archivos ({{ archivos().length }})</h6>
+        <div class="table-responsive">
+          <table class="table table-sm table-hover align-middle mb-0">
+            <tbody>
+              @for (a of archivos(); track a._id) {
+                <tr>
+                  <td>
+                    <a href="javascript:void(0)" class="fw-bold text-dark-blue text-decoration-none" (click)="archivoAbiertoId.set(a._id)">
+                      <i class="fa-sharp fa-solid fa-file me-1"></i> {{ a.nombre }}{{ a.extension }}
+                    </a>
+                    <small class="text-muted ms-2">({{ formatearBytes(a.tamanoBytes) }})</small>
+                  </td>
+                  <td class="text-end">
+                    <div class="btn-group btn-group-sm">
+                      <button class="btn btn-outline-minimal" (click)="archivoAbiertoId.set(a._id)">Abrir</button>
+                      <button class="btn btn-outline-minimal" (click)="renombrar('ARCHIVO', a._id, a.nombre)">Renombrar</button>
+                      <button class="btn btn-outline-minimal" (click)="mover('ARCHIVO', a._id, a.nombre)">Mover</button>
+                      <button class="btn btn-outline-minimal" (click)="compartir('ARCHIVO', a._id, a.nombre)">Compartir</button>
+                      <button class="btn btn-outline-danger" (click)="enviarAPapelera('ARCHIVO', a._id)">Papelera</button>
+                    </div>
+                  </td>
+                </tr>
+              } @empty {
+                <tr><td colspan="2" class="text-center text-muted small py-3">Sin archivos.</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+
+    @if (archivoAbiertoId(); as idArchivo) {
+      <app-visor-archivo
+        [archivoId]="idArchivo"
+        (cerrar)="archivoAbiertoId.set(null)"
+        (actualizado)="cargarNivel()"
+      />
+    }
+
+    @if (recursoAMover(); as recurso) {
+      <app-modal-mover
+        [recurso]="recurso"
+        (cerrar)="recursoAMover.set(null)"
+        (movido)="recursoAMover.set(null); cargarNivel()"
+      />
+    }
+  </div>
+</div>

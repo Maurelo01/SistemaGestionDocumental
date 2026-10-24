@@ -1,0 +1,61 @@
+@if (archivo(); as arch) {
+  <div class="card content-card border-0 p-4 shadow-sm mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <div>
+        <h5 class="fw-bold text-dark-blue m-0">{{ arch.nombre }}{{ arch.extension }}</h5>
+        <small class="text-muted">
+          Tamaño: {{ formatearBytes(arch.tamanoBytes) }} | Permiso: <strong>{{ nivelAcceso() }}</strong>
+        </small>
+      </div>
+      <div class="d-flex gap-2">
+        <button class="btn btn-sm btn-outline-minimal" (click)="descargar()">Descargar</button>
+        <button class="btn btn-sm btn-light border" (click)="cerrar.emit()">Cerrar</button>
+      </div>
+    </div>
+
+    <textarea
+      rows="7"
+      class="form-control mb-3 font-monospace small"
+      [(ngModel)]="contenido"
+      [readonly]="!puedeEditar"
+    ></textarea>
+
+    @if (puedeEditar) {
+      <div class="text-end mb-3">
+        <button class="btn btn-minimal btn-sm fw-bold px-4" (click)="guardarContenido()">
+          Guardar Cambios
+        </button>
+      </div>
+    }
+
+    <div class="border-top pt-3">
+      <h6 class="fw-bold text-dark-blue mb-2">Comentarios ({{ arch.comentarios.length }})</h6>
+      <div class="mb-3" style="max-height: 160px; overflow-y: auto;">
+        @for (com of arch.comentarios; track com._id) {
+          <div class="p-2 mb-2 bg-light rounded small">
+            <div class="d-flex justify-content-between">
+              <strong class="text-dark-blue">{{ com.nombreUsuario }}</strong>
+              <span class="text-muted">{{ com.fechaCreacion | date:'dd/MM/yyyy HH:mm' }}</span>
+            </div>
+            <div>{{ com.texto }}</div>
+          </div>
+        } @empty {
+          <p class="text-muted small m-0">Sin comentarios registrados.</p>
+        }
+      </div>
+
+      @if (puedeComentar) {
+        <div class="input-group input-group-sm">
+          <input
+            type="text"
+            class="form-control"
+            placeholder="Escribir un comentario..."
+            [(ngModel)]="nuevoComentario"
+            (keyup.enter)="comentar()"
+          >
+          <button class="btn btn-minimal fw-bold" (click)="comentar()">Comentar</button>
+        </div>
+      }
+    </div>
+  </div>
+}

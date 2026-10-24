@@ -1,8 +1,11 @@
 const mongoose = require('mongoose');
 
+const CUOTA_DEFECTO_BYTES = 10 * 1024 * 1024;
+
 const esquemaAlmacenamiento = new mongoose.Schema
 (
   {
+    bytesAsignados: { type: Number, default: CUOTA_DEFECTO_BYTES, min: 0 },
     bytesUsados: { type: Number, default: 0, min: 0 },
     cantidadArchivos: { type: Number, default: 0, min: 0 },
   },
@@ -45,7 +48,12 @@ const esquemaUsuarios = new mongoose.Schema(
     almacenamiento:
     {
       type: esquemaAlmacenamiento,
-      default: () => ({ bytesUsados: 0, cantidadArchivos: 0 }),
+      default: () => 
+      ({
+        bytesAsignados: CUOTA_DEFECTO_BYTES,
+        bytesUsados: 0,
+        cantidadArchivos: 0,
+      }),
     },
   },
   {

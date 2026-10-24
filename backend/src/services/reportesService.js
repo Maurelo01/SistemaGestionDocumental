@@ -122,6 +122,84 @@ const obtenerArchivosConMasOperaciones = async (limite = 10) =>
     ]);
 };
 
+const obtenerArchivosNuncaCompartidos = async () =>
+{
+    return await Archivo.aggregate([
+        { $match: { 'papelera.eliminado': false } },
+        {
+            $lookup:
+            {
+                from: 'permisos',
+                let: { idArchivo: '$_id' },
+                pipeline:
+                [
+                    {
+                        $match:
+                        {
+                            $expr:
+                            {
+                                $and:
+                                [
+                                    { $eq: ['$recursoId', '$$idArchivo'] },
+                                    { $eq: ['$tipoRecurso', 'ARCHIVO'] },
+                                ],
+                            },
+                        },
+                    },
+                ],
+                as: 'permisosAsociados',
+            },
+        },
+        { $match: { 'permisosAsociados.0': { $exists: false } } },
+        ...unirColeccion('usuarios', 'propietarioId', 'propietario'),
+        ...unirColeccion('carpetas', 'carpetaId', 'carpeta'),
+        {
+            $project:
+            {
+                _id: 1,
+                nombre: 1,
+                extension: 1,
+                tamanoBytes: 1,
+                fechaCreacion: 1,
+                propietario: '$propietario.nombreUsuario',
+                carpeta: { $ifNull: ['$carpeta.nombre', 'Raíz'] },
+            },
+        },
+        { $sort: { fechaCreacion: -1 } },
+    ]);
+};
+
+const obtenerCarpetasConMasArchivos = async (limite = 10) =>
+{
+    return await Archivo.aggregate([
+        { $match: { 'papelera.eliminado': false, carpetaId: { $ne: null } } },
+        {
+            $group:
+            {
+                _id: '$carpetaId',
+                cantidadArchivos: { $sum: 1 },
+                tamanoTotalBytes: { $sum: '$tamanoBytes' },
+            },
+        },
+        ...unirColeccion('carpetas', '_id', 'carpeta', false),
+        { $match: { 'carpeta.papelera.eliminado': false } },
+        ...unirColeccion('usuarios', 'carpeta.propietarioId', 'propietario'),
+        {
+            $project:
+            {
+                _id: 0,
+                carpetaId: '$_id',
+                nombreCarpeta: '$carpeta.nombre',
+                propietario: '$propietario.nombreUsuario',
+                cantidadArchivos: 1,
+                tamanoTotalBytes: 1,
+            },
+        },
+        { $sort: { cantidadArchivos: -1, tamanoTotalBytes: -1 } },
+        { $limit: Number(limite) || 10 },
+    ]);
+};
+
 // REPORTES USUARIOS
 
 const obtenerTopUsuariosArchivos = async (limite = 10) =>
@@ -289,4 +367,6 @@ module.exports =
     obtenerOperacionesPorTipo,
     obtenerOperacionesPorPeriodo,
     obtenerPrincipalesAcciones,
+    obtenerArchivosNuncaCompartidos,
+    obtenerCarpetasConMasArchivos,
 };
